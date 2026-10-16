@@ -34,7 +34,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return saved;
       }
     } catch {}
-    return 'carbon-black';
+    return 'jarvis-cyan';
   });
 
   const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {

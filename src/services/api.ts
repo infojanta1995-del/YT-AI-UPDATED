@@ -54,6 +54,11 @@ export interface ScriptGenerationResponse {
   estimatedTotalSeconds: number;
   segments: GeneratedSegment[];
   model: string;
+  topic?: string;
+  angle?: string;
+  targetAudience?: string;
+  hookStyle?: string;
+  suggestedTitle?: string;
 }
 
 export interface GeminiKeyStatusResponse {
@@ -157,6 +162,44 @@ export const api = {
           contentMode: params.contentMode,
           durationSeconds: params.durationSeconds,
           language: params.language,
+        }),
+      },
+      {
+        maxRetries: 3,
+        initialDelayMs: 1500,
+        backoffFactor: 1.8,
+        onRetry: params.onRetry,
+      }
+    );
+  },
+
+  async generateScriptFromTopic(params: {
+    userId: string;
+    topic: string;
+    angle?: string;
+    targetAudience?: string;
+    contentMode: string;
+    durationSeconds: number;
+    language: string;
+    hookStyle?: string;
+    onRetry?: (info: { attempt: number; maxRetries: number; delayMs: number; reason: string; status?: number }) => void;
+  }): Promise<ScriptGenerationResponse> {
+    return safeFetchAIJson<ScriptGenerationResponse>(
+      '/api/script/generate-topic',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': params.userId,
+        },
+        body: JSON.stringify({
+          topic: params.topic,
+          angle: params.angle,
+          targetAudience: params.targetAudience,
+          contentMode: params.contentMode,
+          durationSeconds: params.durationSeconds,
+          language: params.language,
+          hookStyle: params.hookStyle,
         }),
       },
       {

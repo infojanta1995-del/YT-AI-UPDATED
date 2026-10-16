@@ -44,3 +44,77 @@ body {
 * {
   border-color: var(--border-subtle);
 }
+
+/* JARVIS Futuristic HUD & Glow Styles */
+.jarvis-panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(16px);
+  position: relative;
+}
+
+.jarvis-panel-glow {
+  box-shadow: 0 0 20px -3px var(--accent-glow), 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.jarvis-border-glow {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+/* Animated HUD Rings */
+@keyframes jarvisSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes jarvisSpinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes jarvisPulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes jarvisWave {
+  0%, 100% { height: 6px; }
+  50% { height: 26px; }
+}
+
+.animate-jarvis-spin {
+  animation: jarvisSpin 24s linear infinite;
+}
+
+.animate-jarvis-spin-reverse {
+  animation: jarvisSpinReverse 18s linear infinite;
+}
+
+.animate-jarvis-spin-fast {
+  animation: jarvisSpin 6s linear infinite;
+}
+
+.animate-jarvis-pulse {
+  animation: jarvisPulse 3s ease-in-out infinite;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}

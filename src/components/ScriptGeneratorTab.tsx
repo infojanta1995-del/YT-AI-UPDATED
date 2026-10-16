@@ -25,6 +25,7 @@ import {
 import { api, type GeneratedSegment, type ScriptGenerationResponse } from '../services/api.ts';
 import { formatAIErrorMessage } from '../services/apiResponseHandler.ts';
 import type { SourceItem } from './SourcesTab.tsx';
+import { ScriptGenerator } from './ScriptGenerator.tsx';
 
 const CONTENT_MODES = [
   { id: 'Professional News', label: 'Professional News', desc: 'Credible, neutral presenter; prioritizes main development, verified details, and context.' },
@@ -78,6 +79,7 @@ export const ScriptGeneratorTab: React.FC<ScriptGeneratorTabProps> = ({
   onTransferToThumbnailStudio,
   onTransferToYTEditor,
 }) => {
+  const [scriptMode, setScriptMode] = useState<'topic' | 'source'>(initialSourceId ? 'source' : 'topic');
   const [contentMode, setContentMode] = useState<string>('Professional News');
   const [durationSeconds, setDurationSeconds] = useState<number>(32);
   const [language, setLanguage] = useState<string>('Hindi');
@@ -392,8 +394,52 @@ export const ScriptGeneratorTab: React.FC<ScriptGeneratorTabProps> = ({
         )}
       </div>
 
-      {/* Input Configuration Grid */}
-      <div
+      {/* Mode Switcher Tabs */}
+      <div className="flex items-center space-x-2 border-b pb-3" style={{ borderColor: 'var(--border-subtle)' }}>
+        <button
+          type="button"
+          onClick={() => setScriptMode('topic')}
+          className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
+          style={{
+            backgroundColor: scriptMode === 'topic' ? 'var(--accent-primary)' : 'var(--bg-surface-elevated)',
+            color: scriptMode === 'topic' ? '#ffffff' : 'var(--text-secondary)',
+            border: '1px solid',
+            borderColor: scriptMode === 'topic' ? 'var(--accent-primary)' : 'var(--border-subtle)',
+          }}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Topic-Based Script Generator</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setScriptMode('source')}
+          className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
+          style={{
+            backgroundColor: scriptMode === 'source' ? 'var(--accent-primary)' : 'var(--bg-surface-elevated)',
+            color: scriptMode === 'source' ? '#ffffff' : 'var(--text-secondary)',
+            border: '1px solid',
+            borderColor: scriptMode === 'source' ? 'var(--accent-primary)' : 'var(--border-subtle)',
+          }}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>Source Article Library ({savedSources.length})</span>
+        </button>
+      </div>
+
+      {scriptMode === 'topic' ? (
+        <ScriptGenerator
+          userId={userId}
+          onNavigateToConfig={onNavigateToConfig}
+          onNavigateToSources={onNavigateToSources}
+          onTransferToVideoPrompts={onTransferToVideoPrompts}
+          onTransferToSEOStudio={onTransferToSEOStudio}
+          onTransferToThumbnailStudio={onTransferToThumbnailStudio}
+          onTransferToYTEditor={onTransferToYTEditor}
+        />
+      ) : (
+        <>
+          {/* Input Configuration Grid */}
+          <div
         className="rounded-2xl p-6 border shadow-xl backdrop-blur-md space-y-6"
         style={{
           backgroundColor: 'var(--bg-surface)',
@@ -1070,6 +1116,8 @@ export const ScriptGeneratorTab: React.FC<ScriptGeneratorTabProps> = ({
             </button>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

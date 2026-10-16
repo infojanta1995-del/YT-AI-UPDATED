@@ -1,4 +1,4 @@
-export type ThemePreset = 'carbon-black' | 'midnight-blue' | 'dark-slate' | 'light-mode';
+export type ThemePreset = 'jarvis-cyan' | 'carbon-black' | 'midnight-blue' | 'dark-slate' | 'light-mode';
 export type ThemeMode = 'dark' | 'light' | 'system';
 
 export interface ThemePresetDefinition {
@@ -19,6 +19,56 @@ export interface ThemePresetDefinition {
 }
 
 export const THEME_PRESETS: ThemePresetDefinition[] = [
+  {
+    id: 'jarvis-cyan',
+    name: 'JARVIS Electric Cyan',
+    tagline: 'Deep Obsidian & Cyan (Signature)',
+    description: 'Cinematic deep obsidian (#040711) with layered graphite HUD panels (#090f1d), electric cyan glow (#00f0ff), and luminous tech edges.',
+    accentColor: '#00f0ff',
+    previewBg: '#040711',
+    previewCard: '#090f1d',
+    previewAccent: '#00f0ff',
+    previewText: '#f0fdff',
+    previewGradient: 'from-[#040711] via-[#090f1d] to-[#0d1b2a]',
+    vars: {
+      dark: {
+        '--bg-base': '#040711',
+        '--bg-surface': 'rgba(9, 15, 29, 0.88)',
+        '--bg-surface-elevated': 'rgba(13, 23, 42, 0.96)',
+        '--bg-surface-hover': 'rgba(18, 32, 60, 0.75)',
+        '--border-subtle': 'rgba(0, 240, 255, 0.16)',
+        '--border-focus': '#00f0ff',
+        '--text-primary': '#f0fdff',
+        '--text-secondary': '#8be9fd',
+        '--text-muted': '#5ba4b5',
+        '--accent-primary': '#00f0ff',
+        '--accent-hover': '#06b6d4',
+        '--accent-glow': 'rgba(0, 240, 255, 0.28)',
+        '--accent-subtle': 'rgba(0, 240, 255, 0.12)',
+        '--accent-text': '#00f0ff',
+        '--nebula-color-1': 'rgba(0, 240, 255, 0.12)',
+        '--nebula-color-2': 'rgba(14, 165, 233, 0.08)',
+      },
+      light: {
+        '--bg-base': '#f0f9ff',
+        '--bg-surface': 'rgba(255, 255, 255, 0.92)',
+        '--bg-surface-elevated': 'rgba(224, 242, 254, 0.98)',
+        '--bg-surface-hover': 'rgba(186, 230, 253, 0.8)',
+        '--border-subtle': 'rgba(6, 182, 212, 0.3)',
+        '--border-focus': '#0891b2',
+        '--text-primary': '#082f49',
+        '--text-secondary': '#0369a1',
+        '--text-muted': '#0284c7',
+        '--accent-primary': '#0891b2',
+        '--accent-hover': '#0e7490',
+        '--accent-glow': 'rgba(8, 145, 178, 0.22)',
+        '--accent-subtle': 'rgba(8, 145, 178, 0.08)',
+        '--accent-text': '#0891b2',
+        '--nebula-color-1': 'rgba(6, 182, 212, 0.05)',
+        '--nebula-color-2': 'rgba(14, 165, 233, 0.03)',
+      },
+    },
+  },
   {
     id: 'carbon-black',
     name: 'Carbon Black',

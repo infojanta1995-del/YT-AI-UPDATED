@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GEMINI_MODEL_ID, OFFICIAL_MODEL_DOC_URL, OFFICIAL_AI_STUDIO_KEYS_URL, OFFICIAL_GCP_CREDENTIALS_URL } from './server/constants.js';
 import { encryptValue, decryptValue, maskApiKey, isEphemeralKey, type EncryptedPayload } from './server/crypto.js';
-import { validateGeminiKey, generateVideoScript, generateVideoPrompts, generateSingleVideoPrompt, generateYouTubeSEO, regenerateSEOSection, generateThumbnailStudioPackage, regenerateThumbnailConcept } from './server/geminiService.js';
+import { validateGeminiKey, generateVideoScript, generateTopicVideoScript, generateVideoPrompts, generateSingleVideoPrompt, generateYouTubeSEO, regenerateSEOSection, generateThumbnailStudioPackage, regenerateThumbnailConcept } from './server/geminiService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -469,6 +469,82 @@ app.post('/api/script/generate', rateLimiter(15, 60000), async (req, res) => {
       contentMode,
       durationSeconds: dur,
       language: lang,
+      apiKey: effectiveApiKey,
+    });
+
+    return res.json(result);
+  } catch (error: any) {
+    const { status, body } = formatApiError(error);
+    return res.status(status).json(body);
+  }
+});
+
+/**
+ * Generate Video Script directly from a User-Provided Topic
+ */
+app.post('/api/script/generate-topic', rateLimiter(15, 60000), async (req, res) => {
+  const userId = req.headers['x-user-id'] as string;
+  const { topic, angle, targetAudience, contentMode, durationSeconds, language, hookStyle } = req.body;
+
+  if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
+    return res.status(400).json({ error: 'Video topic is required.' });
+  }
+
+  let effectiveApiKey: string | null = null;
+  if (userId) {
+    const stored = userKeysStore.get(userId.trim());
+    if (stored) {
+      try {
+        effectiveApiKey = decryptValue(stored.encrypted);
+      } catch {}
+    }
+  }
+
+  if (!effectiveApiKey && process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 0) {
+    effectiveApiKey = process.env.GEMINI_API_KEY.trim();
+  }
+
+  if (!effectiveApiKey) {
+    return res.status(400).json({
+      error: 'Gemini API key is not configured. Please open the "Overview & Connections" tab and configure your Gemini API key in the Gemini API Configuration section.',
+      code: 'API_KEY_NOT_CONFIGURED',
+    });
+  }
+
+  const validDurations = [24, 32, 40, 48, 56, 60];
+  const dur = parseInt(durationSeconds, 10);
+  if (!validDurations.includes(dur)) {
+    return res.status(400).json({ error: 'Duration must be one of: 24, 32, 40, 48, 56, 60 seconds.' });
+  }
+
+  const validModes = [
+    'Professional News',
+    'Breaking News',
+    'Documentary',
+    'Educational',
+    'Explainer',
+    'History',
+    'Science & Technology',
+    'Business & Finance',
+    'Biography',
+    'Storytelling',
+    'Mystery & Investigation',
+    'Motivational',
+  ];
+  const selectedMode = validModes.includes(contentMode) ? contentMode : 'Educational';
+
+  const validLanguages = ['Hindi', 'Gujarati', 'English', 'Hinglish'];
+  const lang = validLanguages.includes(language) ? language : 'English';
+
+  try {
+    const result = await generateTopicVideoScript({
+      topic: topic.trim(),
+      angle: angle ? String(angle).trim() : undefined,
+      targetAudience: targetAudience ? String(targetAudience).trim() : undefined,
+      contentMode: selectedMode,
+      durationSeconds: dur,
+      language: lang,
+      hookStyle: hookStyle ? String(hookStyle).trim() : undefined,
       apiKey: effectiveApiKey,
     });
 

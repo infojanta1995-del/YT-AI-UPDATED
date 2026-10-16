@@ -531,6 +531,170 @@ Generate the voiceover script for each segment following the exact timestamps an
   };
 }
 
+export interface TopicScriptParams {
+  topic: string;
+  angle?: string;
+  targetAudience?: string;
+  contentMode: string;
+  durationSeconds: number;
+  language: string;
+  hookStyle?: string;
+  apiKey: string;
+}
+
+export interface GeneratedTopicScriptResult extends GeneratedScriptResult {
+  topic: string;
+  angle?: string;
+  targetAudience?: string;
+  hookStyle?: string;
+  suggestedTitle?: string;
+}
+
+/**
+ * Generates an engaging, high-retention YouTube short-video script directly from a user-provided topic.
+ * Strictly uses GEMINI_MODEL_ID ('gemini-3.8-flash') with automatic 503 retry.
+ */
+export async function generateTopicVideoScript(params: TopicScriptParams): Promise<GeneratedTopicScriptResult> {
+  const { topic, angle, targetAudience, contentMode, durationSeconds, language, hookStyle, apiKey } = params;
+
+  if (!topic || topic.trim().length === 0) {
+    throw new Error('Topic is required.');
+  }
+
+  const segmentPlan = getSegmentPlan(durationSeconds);
+  const modeRule = MODE_SPECIFIC_RULES[contentMode] || MODE_SPECIFIC_RULES['Professional News'];
+  const langRule = LANGUAGE_RULES[language] || LANGUAGE_RULES['English'];
+
+  const planDescription = segmentPlan
+    .map((s) => `- Segment #${s.segmentNumber}: ${s.typeLabel} [${s.timestamp}] (${s.targetSeconds}s target, ~${(s.targetSeconds * 2.2) | 0} words)`)
+    .join('\n');
+
+  const systemInstruction = `You are an elite YouTube creator, scriptwriter, and audience retention specialist.
+Your task is to write an irresistible, viral YouTube short-video voiceover script on the provided topic.
+
+TOPIC: "${topic.trim()}"
+${angle ? `SPECIFIC ANGLE / KEY POINTS TO COVER: "${angle.trim()}"` : ''}
+${targetAudience ? `TARGET AUDIENCE: "${targetAudience.trim()}"` : ''}
+CONTENT MODE: "${contentMode}"
+Mode Guidelines: ${modeRule}
+
+HOOK STRATEGY (${hookStyle || 'Curiosity Gap'}):
+- Segment 1 MUST hook the viewer within the first 2 seconds!
+- Create immediate intrigue, pose a compelling dilemma, or share a shocking verified fact.
+- NEVER start with pleasantries like "Hey guys", "In this video", "Welcome back", or "Today we will talk about".
+- The hook must flow naturally into Main Part 1.
+
+MANDATORY SEGMENT STRUCTURE:
+You MUST generate EXACTLY ${segmentPlan.length} segments matching these specifications:
+${planDescription}
+For 60 seconds duration, segment 8 is 56–60s (4 seconds).
+
+LANGUAGE & VOICE RULES:
+- ${langRule}
+- Spoken narration speed guideline: ~2.0 to 2.3 words per second.
+- 8-second segments: ~15 to 19 words.
+- 4-second segments: ~7 to 9 words.
+- Write purely speakable, punchy audio voiceover lines. No asterisks, no stage directions, no SFX in the voiceover field.`;
+
+  const userPrompt = `Create a YouTube video script on the topic: "${topic.trim()}".
+${angle ? `Make sure to emphasize: ${angle.trim()}` : ''}
+${targetAudience ? `Tailor the explanation specifically for: ${targetAudience.trim()}` : ''}
+
+Generate exactly ${segmentPlan.length} segments adhering strictly to the duration timestamps.
+Also include a punchy, high-CTR YouTube video title in 'suggestedTitle'.`;
+
+  const ai = new GoogleGenAI({
+    apiKey: apiKey.trim(),
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      },
+    },
+  });
+
+  const { text: textOutput, modelUsed } = await executeGeminiWithRetry(
+    ai,
+    {
+      contents: userPrompt,
+      config: {
+        systemInstruction,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            suggestedTitle: { type: Type.STRING },
+            segments: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  segmentNumber: { type: Type.INTEGER },
+                  type: { type: Type.STRING },
+                  timestamp: { type: Type.STRING },
+                  voiceover: { type: Type.STRING },
+                },
+                required: ['segmentNumber', 'type', 'timestamp', 'voiceover'],
+              },
+            },
+          },
+          required: ['suggestedTitle', 'segments'],
+        },
+        temperature: 0.75,
+      },
+    },
+    {
+      timeoutMs: 35000,
+      maxRetries: 3,
+      initialDelayMs: 1500,
+      label: 'Topic Script Generation',
+    }
+  );
+
+  const parsed = safeExtractJson<{
+    suggestedTitle?: string;
+    segments: Array<{ segmentNumber: number; type: string; timestamp: string; voiceover: string }>;
+  }>(textOutput);
+
+  if (!parsed.segments || !Array.isArray(parsed.segments) || parsed.segments.length === 0) {
+    throw new Error('No valid script segments were produced.');
+  }
+
+  const finalSegments: GeneratedSegment[] = segmentPlan.map((planItem, index) => {
+    const rawSeg = parsed.segments.find((s) => s.segmentNumber === planItem.segmentNumber) || parsed.segments[index];
+    const voiceover = rawSeg?.voiceover?.trim() || '';
+    const words = voiceover ? voiceover.split(/\s+/).filter(Boolean).length : 0;
+    const estDuration = words > 0 ? parseFloat((words / 2.1).toFixed(1)) : planItem.targetSeconds;
+
+    return {
+      segmentNumber: planItem.segmentNumber,
+      type: planItem.typeLabel,
+      timestamp: planItem.timestamp,
+      voiceover,
+      estimatedDurationSeconds: estDuration,
+      wordCount: words,
+    };
+  });
+
+  const totalEstSeconds = parseFloat(
+    finalSegments.reduce((acc, s) => acc + s.estimatedDurationSeconds, 0).toFixed(1)
+  );
+
+  return {
+    contentMode,
+    durationSeconds,
+    language,
+    totalSegments: finalSegments.length,
+    estimatedTotalSeconds: totalEstSeconds,
+    segments: finalSegments,
+    model: modelUsed || GEMINI_MODEL_ID,
+    topic: topic.trim(),
+    angle: angle?.trim(),
+    targetAudience: targetAudience?.trim(),
+    hookStyle: hookStyle?.trim(),
+    suggestedTitle: parsed.suggestedTitle?.trim() || `${topic.trim()} - YouTube Video`,
+  };
+}
+
 export interface VideoPromptSegmentResult {
   segmentNumber: number;
   segmentType: string;

@@ -1,11 +1,10 @@
 import React from 'react';
 import { type User } from 'firebase/auth';
 import {
-  Clapperboard,
+  Cpu,
   X,
   LogOut,
   LogIn,
-  User as UserIcon,
   Sun,
   Moon,
 } from 'lucide-react';
@@ -42,56 +41,56 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
       />
 
       {/* Drawer Container */}
       <div
         className="relative w-72 max-w-[85vw] h-full flex flex-col shadow-2xl border-r z-10 animate-in slide-in-from-left duration-200"
         style={{
-          backgroundColor: 'var(--bg-base)',
-          borderColor: 'var(--border-subtle)',
+          backgroundColor: 'rgba(5, 8, 17, 0.98)',
+          borderColor: 'rgba(0, 240, 255, 0.2)',
         }}
       >
         {/* Drawer Header */}
         <div
           className="h-16 flex items-center px-4 border-b justify-between"
-          style={{ borderColor: 'var(--border-subtle)' }}
+          style={{ borderColor: 'rgba(0, 240, 255, 0.16)' }}
         >
           <div className="flex items-center space-x-3">
             <div
-              className="h-9 w-9 rounded-xl flex items-center justify-center text-white shadow"
-              style={{ backgroundColor: 'var(--accent-primary)' }}
+              className="h-9 w-9 rounded-xl flex items-center justify-center text-cyan-300 shadow border"
+              style={{
+                backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                borderColor: '#00f0ff',
+              }}
             >
-              <Clapperboard className="w-5 h-5" />
+              <Cpu className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-xs font-black flex items-center space-x-1.5" style={{ color: 'var(--text-primary)' }}>
-                <span>YT-AI</span>
-                <span className="px-1 py-0.2 rounded text-[9px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+              <h2 className="text-xs font-black flex items-center space-x-1.5 text-white">
+                <span className="text-cyan-400">JARVIS</span>
+                <span className="px-1 py-0.2 rounded text-[9px] font-mono font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                   STUDIO
                 </span>
               </h2>
-              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                YouTube AI Video Suite
+              <p className="text-[10px] text-slate-400 font-mono">
+                AI YouTube Command
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg border text-xs cursor-pointer"
-            style={{
-              borderColor: 'var(--border-subtle)',
-              color: 'var(--text-secondary)',
-            }}
+            className="p-1.5 rounded-lg border text-xs cursor-pointer text-slate-400 hover:text-white"
+            style={{ borderColor: 'rgba(0, 240, 255, 0.16)' }}
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 py-3 px-3 space-y-1 overflow-y-auto">
           {NAVIGATION_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activePage === item.id;
@@ -103,26 +102,30 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
                   onSelectPage(item.id);
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-xs font-medium cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all text-xs font-semibold cursor-pointer ${
                   isActive
-                    ? 'text-white shadow font-semibold'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'text-white border jarvis-border-glow'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
                 }`}
                 style={{
-                  backgroundColor: isActive ? 'var(--accent-primary)' : 'transparent',
-                  color: isActive ? '#ffffff' : 'var(--text-secondary)',
+                  backgroundColor: isActive ? 'rgba(0, 240, 255, 0.15)' : 'transparent',
+                  borderColor: isActive ? '#00f0ff' : 'transparent',
                 }}
               >
-                <div className="flex items-center space-x-3">
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span>{item.label}</span>
+                <div className="flex items-center space-x-3 min-w-0">
+                  <Icon
+                    className={`w-4 h-4 flex-shrink-0 ${
+                      isActive ? 'text-cyan-300' : 'text-slate-400'
+                    }`}
+                  />
+                  <span className="truncate">{item.label}</span>
                 </div>
                 {item.badge && (
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border ml-1 ${
+                      item.badge === 'NEW'
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
                     }`}
                   >
                     {item.badge}
@@ -136,113 +139,31 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
         {/* Drawer Footer */}
         <div
           className="p-4 border-t space-y-3"
-          style={{ borderColor: 'var(--border-subtle)' }}
+          style={{ borderColor: 'rgba(0, 240, 255, 0.16)' }}
         >
-          {/* Theme Switcher */}
-          <button
-            onClick={toggleMode}
-            className="w-full flex items-center justify-between p-2 rounded-xl border text-xs cursor-pointer"
-            style={{
-              borderColor: 'var(--border-subtle)',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            <div className="flex items-center space-x-2">
-              {resolvedMode === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-indigo-400" />
-              )}
-              <span>{resolvedMode === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-            </div>
-            <span className="text-[10px] font-mono capitalize" style={{ color: 'var(--text-muted)' }}>
-              {resolvedMode}
-            </span>
-          </button>
-
-          {/* User Profile & Sign Out / In */}
           {user ? (
-            <div
-              className="p-2.5 rounded-xl border flex items-center justify-between"
-              style={{
-                backgroundColor: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-              }}
-            >
-              <div className="flex items-center space-x-2.5 overflow-hidden">
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || 'User'}
-                    className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border"
-                    style={{ borderColor: 'var(--border-subtle)' }}
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border"
-                    style={{
-                      backgroundColor: 'var(--accent-subtle)',
-                      borderColor: 'var(--border-subtle)',
-                      color: 'var(--accent-primary)',
-                    }}
-                  >
-                    <UserIcon className="w-4 h-4" />
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <div className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>
-                    {user.displayName || 'Google Account'}
-                  </div>
-                  <div className="text-[10px] truncate" style={{ color: 'var(--text-muted)' }}>
-                    {user.email}
-                  </div>
-                </div>
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-white truncate">
+                {user.displayName || user.email}
               </div>
-
               <button
-                onClick={() => {
-                  onSignOut();
-                  onClose();
-                }}
+                onClick={onSignOut}
                 disabled={signingOut}
-                className="p-1.5 rounded-lg border text-xs hover:bg-rose-500/10 hover:text-rose-400 transition-colors cursor-pointer"
-                style={{
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--text-secondary)',
-                }}
+                className="w-full flex items-center space-x-2 py-2 px-3 rounded-xl text-xs font-medium text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
+                <span>{signingOut ? 'Signing out...' : 'Sign Out'}</span>
               </button>
             </div>
           ) : (
-            <div
-              className="p-2.5 rounded-xl border flex items-center justify-between"
-              style={{
-                backgroundColor: 'var(--bg-surface)',
-                borderColor: 'var(--border-subtle)',
-              }}
+            <button
+              onClick={onSignIn}
+              className="w-full flex items-center justify-center space-x-2 py-2 rounded-xl text-xs font-bold text-black shadow-md cursor-pointer"
+              style={{ backgroundColor: '#00f0ff' }}
             >
-              <div className="min-w-0">
-                <div className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Local Creator
-                </div>
-                <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                  Offline Storage
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (onSignIn) onSignIn();
-                  onClose();
-                }}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
-                style={{ backgroundColor: 'var(--accent-primary)' }}
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Sign In</span>
-              </button>
-            </div>
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In with Google</span>
+            </button>
           )}
         </div>
       </div>
